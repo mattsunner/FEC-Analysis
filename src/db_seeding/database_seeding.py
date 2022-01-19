@@ -37,6 +37,7 @@ def main():
     file7 = open(str(data_path_raw) + 'independent_expenditure_2020.csv')
     file8 = open(str(data_path_raw) + 'independent_expenditure_2022.csv')
 
+    independent_files = [file2, file3, file4, file5, file6, file7, file8]
 
     # Seed Lobbying Data
 
@@ -44,6 +45,16 @@ def main():
     rows = csv.reader(seed_file)
 
     cur.executemany("INSERT INTO lobbyist_bundle VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?", rows)
+
+    # Seed Independent Expediture Data
+
+    for file in independent_files:
+        seed_file = open(file)
+        rows = csv.reader(seed_file)
+
+        cur.executemany("INSERT INTO independent_expenditure VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", rows)
+
+
 
 
 if __name__ == '__main__':
