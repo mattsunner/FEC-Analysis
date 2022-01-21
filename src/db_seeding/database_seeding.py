@@ -1,18 +1,25 @@
-from pathlib import Path
 import sqlite3
 import csv
+import os
+from pathlib import Path
 
 
-# Connect to Database
-def sql_connector(db_name):
-    conn = sqlite3.connect(db_name)
-
-    return conn
+def db_deleter(db_path):
+    if os.path.exists(db_path):
+        os.remove(db_path)
+    else:
+        pass
 
 
 def main():
-    data_path_db = str(Path('data/intermediate/fec_analysis_data.db'))
-    data_path_raw = Path('/data/raw/')
+
+    parent_folder = str(Path(__file__).resolve().parents[2])
+    data_path_db = str(parent_folder +
+                       '/data/intermediate/fec_analysis_database.db') 
+    data_path_raw = str(parent_folder + '/data/raw/')
+    
+    # Database Deletion Tool - Comment Out When Not In Use
+    db_deleter(data_path_db)
 
     conn = sqlite3.connect(data_path_db)
     cur = conn.cursor()
@@ -27,7 +34,7 @@ def main():
                 (cand_id text, cand_name text, spe_id text, spe_nam text, ele_type text, can_office_state text, can_office_dis text, can_office text, cand_pty_aff text, exp_amo text, exp_date text, agg_amo text, sup_opp text, pur text, pay text, file_num text, amndt_ind text, tran_id text, image_num text, receipt_dat text, fec_election_yr text, prev_file_num text, dissem_dt text)''')
 
     # Raw Files
-    file1 = open(str(data_path_raw) + '/lobbyist_bundle.csv')
+    file1 = open(data_path_raw + 'lobbyist_bundle.csv', encoding='utf-8')
     
     file2 = open(str(data_path_raw) + 'independent_expenditure_2010.csv')
     file3 = open(str(data_path_raw) + 'independent_expenditure_2012.csv')
@@ -41,21 +48,18 @@ def main():
 
     # Seed Lobbying Data
 
-    seed_file = open(file1)
-    rows = csv.reader(seed_file)
+    seed_file = file1
+    rows = csv.reader(seed_file, delimiter=',')
+    
+    for row in rows:
+        cur.execute("INSERT INTO lobbyist_bundle VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", row)
+    
+    conn.commit()
 
-    cur.executemany("INSERT INTO lobbyist_bundle VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?", rows)
+    cur.execute("SELECT * FROM lobbyist_bundle")
 
-    # Seed Independent Expediture Data
-
-    for file in independent_files:
-        seed_file = open(file)
-        rows = csv.reader(seed_file)
-
-        cur.executemany("INSERT INTO independent_expenditure VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", rows)
-
-
+    print(cur.fetchall())
 
 
 if __name__ == '__main__':
-    main()
+   main()
