@@ -19,7 +19,7 @@ def main():
     data_path_raw = str(parent_folder + '/data/raw/')
     
     # Database Deletion Tool - Comment Out When Not In Use
-    db_deleter(data_path_db)
+    # db_deleter(data_path_db)
 
     conn = sqlite3.connect(data_path_db)
     cur = conn.cursor()
@@ -54,12 +54,19 @@ def main():
     for row in rows:
         cur.execute("INSERT INTO lobbyist_bundle VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", row)
     
+
+    # Seeding Expenditure Data
+
+    for file in independent_files:
+        rows = csv.reader(file, delimiter=',')
+
+        for row in rows:
+            cur.execute("INSERT INTO independent_expenditure VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", row)
+
+            
     conn.commit()
-
-    cur.execute("SELECT * FROM lobbyist_bundle")
-
-    print(cur.fetchall())
 
 
 if __name__ == '__main__':
    main()
+
